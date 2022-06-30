@@ -1,0 +1,19 @@
+{
+  "name": "vite-plugin-cloudflare-pages",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/potatopotaro/vite-plugin-cloudflare-pages.git"
+  },
+  "author": "Taro Woollett-Chiba",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/potatopotaro/vite-plugin-cloudflare-pages/issues"
+  },
+  "homepage": "https://github.com/potatopotaro/vite-plugin-cloudflare-pages#readme"
+}
