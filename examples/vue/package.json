@@ -1,0 +1,30 @@
+{
+  "name": "test-ssr-vue",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "npm run build:client && npm run build:server",
+    "build:noExternal": "npm run build:client && npm run build:server:noExternal",
+    "build:client": "vite build --ssrManifest --outDir dist",
+    "build:server": "vite build --emptyOutDir false --ssr src/_worker.ts --outDir dist",
+    "build:server:noExternal": "vite build --config vite.config.noexternal.js --ssr src/_worker.ts --outDir dist/server",
+    "generate": "vite build --ssrManifest --outDir dist/static && npm run build:server && node prerender",
+    "serve": "cross-env NODE_ENV=production node server",
+    "debug": "node --inspect-brk server"
+  },
+  "dependencies": {
+    "example-external-component": "file:example-external-component",
+    "vue": "^3.2.37",
+    "vue-router": "^4.0.16",
+    "vuex": "^4.0.2"
+  },
+  "devDependencies": {
+    "dep-import-type": "file:dep-import-type",
+    "vite-plugin-cloudflare-pages": "file:../../",
+    "@cloudflare/workers-types": "^3.14.0",
+    "@vitejs/plugin-vue": "^2.3.3",
+    "@vitejs/plugin-vue-jsx": "^1.3.10"
+  }
+}
