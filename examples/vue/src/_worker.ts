@@ -1,5 +1,5 @@
 // import { render } from "virtual:server-entry";
-import { render } from "./ssr";
+import { render } from "./ssr-entry";
 
 // expect an ASSETS fetcher binding pointing to the asset-server stage
 export interface Env {

@@ -6,6 +6,7 @@
   "files": [
     "dist"
   ],
+  "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -18,13 +19,11 @@
   },
   "scripts": {
     "dev": "unbuild --stub",
-    "build": "unbuild && pnpm run patch-cjs",
+    "build": "unbuild",
+    "vite-repo-build": "unbuild && pnpm run patch-cjs",
     "patch-cjs": "tsx ../../scripts/patchCJS.ts",
     "prepublishOnly": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "engines": {
-    "node": ">=18.0.0"
   },
   "repository": {
     "type": "git",
@@ -35,12 +34,15 @@
   },
   "homepage": "https://github.com/potatopotaro/vite-plugin-cloudflare-pages#readme",
   "peerDependencies": {
-    "vite": "^3.0.0-alpha"
+    "vite": "^3.0.0-beta.5"
   },
   "description": "A Vite plugin for SSR development on Cloudflare Pages. Includes convenient build tooling + a Miniflare integration for Vite's dev server (no need for a separate proxy server).",
   "devDependencies": {
+    "@cloudflare/workers-types": "^3.14.0",
     "@types/debug": "^4.1.7",
     "debug": "^4.3.4",
-    "unbuild": "^0.7.4"
+    "miniflare": "^2.5.1",
+    "unbuild": "^0.7.4",
+    "vite-plugin-inspect": "^0.5.1"
   }
 }

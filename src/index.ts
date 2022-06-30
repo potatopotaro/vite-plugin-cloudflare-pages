@@ -1,182 +1,130 @@
-import fs from "node:fs";
+// import fs from "node:fs";
+import { Miniflare } from "miniflare";
 import type { Plugin, ViteDevServer } from "vite";
 // import { createFilter } from "vite";
-/* eslint-enable import/no-duplicates */
-// import { resolveCompiler } from "./compiler";
-import { parseVueRequest } from "./utils/query";
-// import { getDescriptor, getSrcDescriptor } from "./utils/descriptorCache";
-import { getResolvedScript } from "./script";
-// import { transformMain } from "./main";
-// import { handleHotUpdate } from "./handleHotUpdate";
-// import { transformTemplateAsModule } from "./template";
-// import { transformStyle } from "./style";
-import { EXPORT_HELPER_ID, helperCode } from "./helper";
+// /* eslint-enable import/no-duplicates */
+// // import { resolveCompiler } from "./compiler";
+// import { parseVueRequest } from "./utils/query";
+// // import { getDescriptor, getSrcDescriptor } from "./utils/descriptorCache";
+// import { getResolvedScript } from "./script";
+// // import { transformMain } from "./main";
+// // import { handleHotUpdate } from "./handleHotUpdate";
+// // import { transformTemplateAsModule } from "./template";
+// // import { transformStyle } from "./style";
+// import { EXPORT_HELPER_ID, helperCode } from "./helper";
 
-export { parseVueRequest } from "./utils/query";
-export type { VueQuery } from "./utils/query";
+// export { parseVueRequest } from "./utils/query";
+// export type { VueQuery } from "./utils/query";
 
-export interface Options {
+interface Options {
   /* TODO? */
 }
 
-export interface ResolvedOptions extends Options {
-  /* TODO? */
-}
+// interface ResolvedOptions extends Options {
+//   /* TODO? */
+// }
 
-export default function cloudflarePagesPlugin(
+const NAME = "vite-plugin-cloudflare-pages";
+const BASE = "./"; // relative base to make dist portable
+
+type CloudflarePagesPlugin = (rawOptions: Options) => Plugin;
+
+// "engines": {
+//   "node": ">=18.0.0"
+// },
+
+const cloudflarePagesPlugin: CloudflarePagesPlugin = (
   rawOptions: Options = {}
-): Plugin {
-  // const {
-
-  // } = rawOptions;
-
-  // const filter = createFilter(include, exclude);
-
-  let options: ResolvedOptions = {
-    /* TODO? */
-  };
-
+) => {
+  console.log(">>> INITIAL LOCATION", {
+    importMetaUrl: import.meta.url,
+  });
   return {
-    name: "vite-plugin-cloudflare-pages",
+    name: NAME,
+    configureServer: (viteDevServer: ViteDevServer) => {
+      console.log("START: configureServer");
+      console.log("configureServer LOCATION", {
+        importMetaUrl: import.meta.url,
+      });
+      return () => {
+        console.log("STARTED POST VITE MIDDLEWARE");
+        console.log("POST MIDDLEWARE LOCATION", {
+          importMetaUrl: import.meta.url,
+          dirname: __dirname,
+        });
+        viteDevServer.middlewares.use(async (req, res, next) => {
+          console.log("LOADING");
+          const { default: script } = await viteDevServer.ssrLoadModule(
+            "/src/_worker.ts"
+          );
+          console.log("LOADED", script);
+          console.log("INIT MINIFLARE");
+          // TODO: Figure out how to enable NODE_OPTIONS=--experimental-vm-modules from here
+          const mf = new Miniflare({
+            modules: true,
+            // port: 3000,
+            script,
+            // scriptPath: "./src/_worker.ts",
+            globalAsyncIO: true,
+            globalTimers: true,
+            globalRandom: true,
+            wranglerConfigPath: true,
+            // globals: {
+            //   ping: () => console.log("pong"),
+            // },
+            bindings: {
+              ASSETS: {
+                fetch: async (input, init) => {
+                  try {
+                    console.log("import.meta.url", import.meta.url);
+                    console.log({ input, init });
+                    // TODO: Figure out how to avoid this stupid TS problem
+                    const url = new URL(input?.url ?? input);
+                    console.log(url);
+                    const { default: data } = await import(
+                      url.pathname + "?raw"
+                    );
+                    return new Response(data);
+                  } catch (err) {
+                    console.error(err);
+                    return new Response(JSON.stringify(err), { status: 500 });
+                  }
+                },
+              },
+            },
+            // kvNamespaces: ["TEST_NAMESPACE"],
+          });
+          console.log("INITIALIZED MINIFLARE");
+          console.log("RUNTIME LOCATION", {
+            importMetaUrl: import.meta.url,
+          });
+          console.log("NETWORK REQUEST FOR", req.url);
+          // const { default: workerScript } = await viteDevServer.ssrLoadModule(
+          //   "./src/_worker.ts"
+          // );
 
-    // TODO?
-    // handleHotUpdate(ctx) {
-    //   if (!filter(ctx.file)) {
-    //     return;
-    //   }
-    //   return handleHotUpdate(ctx, options);
-    // },
+          const url = new URL(req.url, "http://localhost:5173");
+          console.log("URL", url);
 
-    config(config) {
-      return {
-        // TODO?
-        // define: {
-        //   __VUE_OPTIONS_API__: config.define?.__VUE_OPTIONS_API__ ?? true,
-        //   __VUE_PROD_DEVTOOLS__: config.define?.__VUE_PROD_DEVTOOLS__ ?? false,
-        // },
-        //
-        // TODO?
-        // ssr: {
-        //   external: ["vue", "@vue/server-renderer"],
-        // },
+          // const request = new Request(url);
+          // console.log("REQUEST OBJECT", url.href);
+
+          // const response = await mf.dispatchFetch(url.href, request);
+
+          // console.log("RESPONSE OBJECT", response);
+
+          // const data = await response.text();
+
+          // res.writeHead(response.status, response.headers);
+          // // res.write();
+          // res.end(data);
+          next();
+        });
+        console.log("FINISHED POST VITE MIDDLEWARE");
+        console.log("END: configureServer");
       };
     },
-
-    // TODO?
-    // configResolved(config) {
-    //   options = {
-    //     ...options,
-    //     // ...
-    //   };
-    // },
-
-    // TODO?
-    // configureServer(server) {
-    //   // options.devServer = server;
-    // },
-
-    // TODO?
-    // async resolveId(id) {
-    //   // component export helper
-    //   if (id === EXPORT_HELPER_ID) {
-    //     return id;
-    //   }
-    //   // serve sub-part requests (*?vue) as virtual modules
-    //   if (parseVueRequest(id).query.vue) {
-    //     return id;
-    //   }
-    // },
-
-    // TODO?
-    // load(id, opt) {
-    //   const ssr = opt?.ssr === true;
-    //   if (id === EXPORT_HELPER_ID) {
-    //     return helperCode;
-    //   }
-
-    //   const { filename, query } = parseVueRequest(id);
-    //   // select corresponding block for sub-part virtual modules
-    //   if (query.vue) {
-    //     if (query.src) {
-    //       return fs.readFileSync(filename, "utf-8");
-    //     }
-    //     const descriptor = getDescriptor(filename, options)!;
-    //     let block: SFCBlock | null | undefined;
-    //     if (query.type === "script") {
-    //       // handle <scrip> + <script setup> merge via compileScript()
-    //       block = getResolvedScript(descriptor, ssr);
-    //     } else if (query.type === "template") {
-    //       block = descriptor.template!;
-    //     } else if (query.type === "style") {
-    //       block = descriptor.styles[query.index!];
-    //     } else if (query.index != null) {
-    //       block = descriptor.customBlocks[query.index];
-    //     }
-    //     if (block) {
-    //       return {
-    //         code: block.content,
-    //         map: block.map as any,
-    //       };
-    //     }
-    //   }
-    // },
-
-    // TODO?
-    // transform(code, id, opt) {
-    //   const ssr = opt?.ssr === true;
-    //   const { filename, query } = parseVueRequest(id);
-    //   if (query.raw) {
-    //     return;
-    //   }
-    //   if (!filter(filename) && !query.vue) {
-    //     if (
-    //       !query.vue &&
-    //       refTransformFilter(filename) &&
-    //       options.compiler.shouldTransformRef(code)
-    //     ) {
-    //       return options.compiler.transformRef(code, {
-    //         filename,
-    //         sourceMap: true,
-    //       });
-    //     }
-    //     return;
-    //   }
-
-    //   if (!query.vue) {
-    //     // main request
-    //     return transformMain(
-    //       code,
-    //       filename,
-    //       options,
-    //       this,
-    //       ssr,
-    //       customElementFilter(filename)
-    //     );
-    //   } else {
-    //     // sub block request
-    //     const descriptor = query.src
-    //       ? getSrcDescriptor(filename, query)!
-    //       : getDescriptor(filename, options)!;
-
-    //     if (query.type === "template") {
-    //       return transformTemplateAsModule(
-    //         code,
-    //         descriptor,
-    //         options,
-    //         this,
-    //         ssr
-    //       );
-    //     } else if (query.type === "style") {
-    //       return transformStyle(
-    //         code,
-    //         descriptor,
-    //         Number(query.index),
-    //         options,
-    //         this,
-    //         filename
-    //       );
-    //     }
-    //   }
-    // },
   };
-}
+};
+
+export default cloudflarePagesPlugin;

@@ -6,7 +6,7 @@ import type { HmrContext, ModuleNode } from "vite";
 //   setPrevDescriptor,
 // } from "./utils/descriptorCache";
 import { getResolvedScript, setResolvedScript } from "./script";
-import type { ResolvedOptions } from ".";
+import type { ResolvedOptions } from "./todo-index";
 
 const debug = _debug("vite:hmr");
 

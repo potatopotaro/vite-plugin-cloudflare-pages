@@ -1,5 +1,5 @@
 // import { resolveTemplateCompilerOptions } from "./template";
-import type { ResolvedOptions } from ".";
+import type { ResolvedOptions } from "./todo-index";
 
 // ssr and non ssr builds would output different script content
 const clientCache = new WeakMap();
