@@ -1,19 +1,46 @@
 {
   "name": "vite-plugin-cloudflare-pages",
   "version": "0.0.1",
-  "description": "",
-  "main": "index.js",
+  "license": "MIT",
+  "author": "Taro Woollett-Chiba",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    }
+  },
   "scripts": {
+    "dev": "unbuild --stub",
+    "build": "unbuild && pnpm run patch-cjs",
+    "patch-cjs": "tsx ../../scripts/patchCJS.ts",
+    "prepublishOnly": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/potatopotaro/vite-plugin-cloudflare-pages.git"
   },
-  "author": "Taro Woollett-Chiba",
-  "license": "MIT",
   "bugs": {
     "url": "https://github.com/potatopotaro/vite-plugin-cloudflare-pages/issues"
   },
-  "homepage": "https://github.com/potatopotaro/vite-plugin-cloudflare-pages#readme"
+  "homepage": "https://github.com/potatopotaro/vite-plugin-cloudflare-pages#readme",
+  "peerDependencies": {
+    "vite": "^3.0.0-alpha"
+  },
+  "description": "A Vite plugin for SSR development on Cloudflare Pages. Includes convenient build tooling + a Miniflare integration for Vite's dev server (no need for a separate proxy server).",
+  "devDependencies": {
+    "@types/debug": "^4.1.7",
+    "debug": "^4.3.4",
+    "unbuild": "^0.7.4"
+  }
 }
